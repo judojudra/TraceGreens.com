@@ -1,0 +1,152 @@
+{% extends "base.html" %}
+{% block title %}Seed Inventory - TraceGreens{% endblock %}
+{% block page_title %}Seed Inventory{% endblock %}
+{% block topbar_actions %}
+<button onclick="document.getElementById('addModal').style.display='flex'" class="btn">+ Add Seed</button>
+{% endblock %}
+{% block content %}
+
+<div class="card">
+    {% if seeds %}
+    <div class="table-wrap">
+    <table>
+        <thead>
+            <tr>
+                <th>Variety</th>
+                <th>Code</th>
+                <th>Supplier</th>
+                <th>Lot #</th>
+                <th>Cost/kg</th>
+                <th>Cost/Tray</th>
+                <th>Stock (kg)</th>
+                <th>Trays Possible</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for seed in seeds %}
+            <tr>
+                <td><strong>{{ seed.variety }}</strong></td>
+                <td>{{ seed.variety_code }}</td>
+                <td>{{ seed.supplier }}</td>
+                <td class="text-sm">{{ seed.lot_number }}</td>
+                <td>{{ seed.cost_per_kg }}</td>
+                <td>{{ seed.cost_per_tray }}</td>
+                <td>{{ seed.quantity_kg }}</td>
+                <td>{{ (seed.quantity_kg * 1000 / 25)|int }}</td>
+                <td>
+                    <button onclick="openEditSeed({{ seed.id }}, '{{ seed.variety }}', '{{ seed.variety_code }}', '{{ seed.supplier }}', '{{ seed.lot_number }}', '{{ seed.cost_per_kg }}', '{{ seed.quantity_kg }}')" class="btn btn-sm btn-outline">Edit</button>
+                    <form method="POST" action="/admin/inventory/{{ seed.id }}/delete" style="display:inline" onsubmit="return confirm('Delete {{ seed.variety }}? Only works if no batches use it.')">
+                        <button type="submit" class="btn btn-sm btn-danger">Del</button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    </div>
+    {% else %}
+    <div class="empty-state"><p>No seeds in inventory yet.</p></div>
+    {% endif %}
+</div>
+
+<!-- Add Seed Modal -->
+<div id="addModal" style="display:none; position:fixed; top:0;left:0;right:0;bottom:0; background:rgba(0,0,0,0.4); z-index:100; justify-content:center; align-items:center;">
+    <div class="card" style="width:450px; max-width:90vw;">
+        <h2>Add Seed Variety</h2>
+        <form method="POST" action="/admin/inventory/create">
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Variety Name</label>
+                    <input type="text" name="variety" class="form-control" required placeholder="e.g. Radish">
+                </div>
+                <div class="form-group">
+                    <label>Variety Code</label>
+                    <input type="text" name="variety_code" class="form-control" required placeholder="e.g. RAD" maxlength="10" style="text-transform:uppercase;">
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Supplier</label>
+                    <input type="text" name="supplier" class="form-control" required placeholder="e.g. Mumbai Seeds Co.">
+                </div>
+                <div class="form-group">
+                    <label>Lot Number</label>
+                    <input type="text" name="lot_number" class="form-control" required placeholder="e.g. RAD-2026-001">
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Cost per kg (INR)</label>
+                    <input type="number" name="cost_per_kg" class="form-control" required step="0.01" placeholder="800">
+                </div>
+                <div class="form-group">
+                    <label>Quantity (kg)</label>
+                    <input type="number" name="quantity_kg" class="form-control" required step="0.001" placeholder="5.0">
+                </div>
+            </div>
+            <div style="display:flex; gap:0.5rem; justify-content:flex-end; margin-top:0.5rem;">
+                <button type="button" onclick="document.getElementById('addModal').style.display='none'" class="btn btn-outline">Cancel</button>
+                <button type="submit" class="btn">Add Seed</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Edit Seed Modal -->
+<div id="editModal" style="display:none; position:fixed; top:0;left:0;right:0;bottom:0; background:rgba(0,0,0,0.4); z-index:100; justify-content:center; align-items:center;">
+    <div class="card" style="width:450px; max-width:90vw;">
+        <h2>Edit Seed</h2>
+        <form method="POST" id="editForm" action="">
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Variety Name</label>
+                    <input type="text" name="variety" id="e_variety" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label>Variety Code</label>
+                    <input type="text" name="variety_code" id="e_variety_code" class="form-control" required maxlength="10" style="text-transform:uppercase;">
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Supplier</label>
+                    <input type="text" name="supplier" id="e_supplier" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label>Lot Number</label>
+                    <input type="text" name="lot_number" id="e_lot_number" class="form-control" required>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Cost per kg (INR)</label>
+                    <input type="number" name="cost_per_kg" id="e_cost_per_kg" class="form-control" required step="0.01">
+                </div>
+                <div class="form-group">
+                    <label>Quantity (kg)</label>
+                    <input type="number" name="quantity_kg" id="e_quantity_kg" class="form-control" required step="0.001">
+                </div>
+            </div>
+            <div style="display:flex; gap:0.5rem; justify-content:flex-end; margin-top:0.5rem;">
+                <button type="button" onclick="document.getElementById('editModal').style.display='none'" class="btn btn-outline">Cancel</button>
+                <button type="submit" class="btn">Save</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+function openEditSeed(id, variety, code, supplier, lot, cost, qty) {
+    document.getElementById('editForm').action = '/admin/inventory/' + id + '/edit';
+    document.getElementById('e_variety').value = variety;
+    document.getElementById('e_variety_code').value = code;
+    document.getElementById('e_supplier').value = supplier;
+    document.getElementById('e_lot_number').value = lot;
+    document.getElementById('e_cost_per_kg').value = cost;
+    document.getElementById('e_quantity_kg').value = qty;
+    document.getElementById('editModal').style.display = 'flex';
+}
+</script>
+
+{% endblock %}

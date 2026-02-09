@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}TraceGreens Admin{% endblock %}</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --green-900: #0d3b11;
+            --green-800: #145a1c;
+            --green-700: #1b7a25;
+            --green-600: #22952e;
+            --green-500: #2ecc40;
+            --green-100: #e8f7ea;
+            --green-50: #f2fbf3;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #f7f8fa;
+            color: #1a1a1a;
+            line-height: 1.6;
+            display: flex;
+            min-height: 100vh;
+            -webkit-font-smoothing: antialiased;
+        }
+        /* ---- SIDEBAR ---- */
+        .sidebar {
+            width: 230px;
+            background: var(--green-900);
+            color: white;
+            padding: 1.5rem 0;
+            position: fixed;
+            top: 0; left: 0; bottom: 0;
+            overflow-y: auto;
+            z-index: 50;
+            transition: transform 0.3s ease;
+        }
+        .sidebar .brand {
+            padding: 0 1.25rem; font-size: 1.2rem; font-weight: 700; margin-bottom: 0.15rem;
+        }
+        .sidebar .brand span { color: var(--green-500); }
+        .sidebar .tagline {
+            padding: 0 1.25rem; font-size: 0.65rem; color: rgba(255,255,255,0.3);
+            margin-bottom: 1.75rem; letter-spacing: 0.03em;
+        }
+        .sidebar nav a {
+            display: flex; align-items: center; gap: 0.6rem;
+            padding: 0.55rem 1.25rem;
+            color: rgba(255,255,255,0.6);
+            text-decoration: none;
+            font-size: 0.85rem; font-weight: 500;
+            transition: all 0.2s;
+            border-left: 3px solid transparent;
+        }
+        .sidebar nav a:hover { background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.9); }
+        .sidebar nav a.active {
+            background: linear-gradient(90deg, rgba(46,204,64,0.15), rgba(255,255,255,0.06));
+            color: white; font-weight: 600; border-left-color: var(--green-500);
+        }
+        .sidebar nav .section-label {
+            padding: 1.25rem 1.25rem 0.3rem;
+            font-size: 0.6rem; text-transform: uppercase;
+            letter-spacing: 0.1em; color: rgba(255,255,255,0.25); font-weight: 700;
+        }
+        .sidebar-footer {
+            position: absolute; bottom: 0; width: 100%;
+            padding: 0.75rem 1.25rem;
+            border-top: 1px solid rgba(255,255,255,0.06);
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .sidebar-footer a {
+            color: rgba(255,255,255,0.35); text-decoration: none; font-size: 0.75rem;
+            transition: color 0.2s;
+        }
+        .sidebar-footer a:hover { color: rgba(255,255,255,0.7); }
+        /* ---- OVERLAY ---- */
+        .sidebar-overlay {
+            display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.5); z-index: 49;
+        }
+        .sidebar-overlay.active { display: block; }
+        /* ---- HAMBURGER ---- */
+        .hamburger {
+            display: none; background: none; border: none; cursor: pointer;
+            padding: 0.5rem; flex-direction: column; gap: 5px;
+        }
+        .hamburger span {
+            display: block; width: 22px; height: 2px; background: #333;
+            border-radius: 2px; transition: all 0.3s;
+        }
+        /* ---- MAIN ---- */
+        .main { margin-left: 230px; flex: 1; min-height: 100vh; }
+        .topbar {
+            background: white;
+            padding: 0.85rem 2rem;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+            display: flex; justify-content: space-between; align-items: center;
+            position: sticky; top: 0; z-index: 10;
+            gap: 0.75rem;
+        }
+        .topbar h1 { font-size: 1.1rem; color: #111; margin: 0; font-weight: 700; }
+        .topbar-left { display: flex; align-items: center; gap: 0.75rem; }
+        .content { padding: 1.5rem 2rem; max-width: 1200px; }
+        /* ---- CARDS ---- */
+        .card {
+            background: white; border-radius: 12px; padding: 1.35rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.03);
+            margin-bottom: 1.25rem;
+            border: 1px solid rgba(0,0,0,0.04);
+            transition: box-shadow 0.2s ease;
+        }
+        .card:hover {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05), 0 1px 3px rgba(0,0,0,0.04);
+        }
+        .card h2 { font-size: 0.92rem; color: #333; margin-bottom: 0.85rem; font-weight: 700; }
+        /* ---- METRICS ---- */
+        .metric-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+            gap: 1rem; margin-bottom: 1.5rem;
+        }
+        .metric {
+            background: white; border-radius: 12px; padding: 1.15rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+            border: 1px solid rgba(0,0,0,0.04);
+            border-top: 3px solid var(--green-600);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .metric:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(0,0,0,0.06);
+        }
+        .metric .value { font-size: 1.65rem; font-weight: 800; color: var(--green-800); }
+        .metric .label { font-size: 0.72rem; color: #999; margin-top: 0.1rem; font-weight: 500; text-transform: uppercase; letter-spacing: 0.03em; }
+        /* ---- TABLES ---- */
+        .table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; margin: -0.25rem; padding: 0.25rem; }
+        table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+        th, td { text-align: left; padding: 0.65rem 0.75rem; border-bottom: 1px solid #f0f0f0; }
+        th { font-weight: 600; color: #888; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.04em; border-bottom: 2px solid #eee; }
+        tbody tr { transition: background 0.15s; }
+        tbody tr:nth-child(even) { background: #fafafa; }
+        tbody tr:hover { background: var(--green-50); }
+        /* ---- BADGES ---- */
+        .badge {
+            display: inline-block; padding: 0.18rem 0.55rem;
+            border-radius: 20px; font-size: 0.7rem; font-weight: 700;
+            text-transform: uppercase; letter-spacing: 0.02em;
+        }
+        .badge-blackout { background: #1a1a2e; color: white; }
+        .badge-light { background: #fef3c7; color: #b45309; }
+        .badge-harvested { background: #d1fae5; color: #065f46; }
+        .badge-discarded { background: #fee2e2; color: #991b1b; }
+        /* ---- BUTTONS ---- */
+        .btn {
+            display: inline-flex; align-items: center; gap: 0.35rem;
+            padding: 0.45rem 1rem; background: var(--green-800);
+            color: white; border: none; border-radius: 6px;
+            cursor: pointer; font-size: 0.82rem; font-weight: 600;
+            text-decoration: none; transition: all 0.2s;
+            font-family: 'Inter', sans-serif;
+        }
+        .btn:hover { background: var(--green-900); }
+        .btn:active { transform: scale(0.97); }
+        .btn-sm { padding: 0.3rem 0.65rem; font-size: 0.75rem; }
+        .btn-outline { background: transparent; color: var(--green-800); border: 1.5px solid var(--green-800); }
+        .btn-outline:hover { background: var(--green-800); color: white; }
+        .btn-danger { background: #dc2626; }
+        .btn-danger:hover { background: #b91c1c; }
+        .btn-warning { background: #ea580c; }
+        .btn-warning:hover { background: #c2410c; }
+        /* ---- FORMS ---- */
+        .form-group { margin-bottom: 0.85rem; }
+        .form-group label { display: block; font-size: 0.75rem; font-weight: 600; color: #666; margin-bottom: 0.25rem; }
+        .form-control {
+            width: 100%; padding: 0.5rem 0.75rem;
+            border: 1.5px solid #e0e0e0; border-radius: 6px;
+            font-size: 0.88rem; outline: none; transition: all 0.2s;
+            font-family: 'Inter', sans-serif; background: white;
+        }
+        .form-control:focus { border-color: var(--green-600); box-shadow: 0 0 0 3px rgba(34,149,46,0.1); }
+        select.form-control { background: white; }
+        .form-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 0.85rem; }
+        /* ---- ALERTS ---- */
+        .alert { padding: 0.7rem 1rem; border-radius: 8px; margin-bottom: 1rem; font-size: 0.85rem; font-weight: 500; }
+        .alert-success { background: #ecfdf5; color: #065f46; border: 1px solid #a7f3d0; }
+        .alert-warning { background: #fffbeb; color: #92400e; border: 1px solid #fde68a; }
+        .alert-danger { background: #fef2f2; color: #991b1b; border: 1px solid #fecaca; }
+        /* ---- ACTION ITEMS ---- */
+        .action-item {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 0.8rem 0.85rem; border-radius: 10px; margin-bottom: 0.4rem;
+            background: #fafafa; border: 1px solid #f0f0f0; transition: all 0.2s;
+        }
+        .action-item:hover { background: var(--green-50); border-color: var(--green-100); transform: translateX(2px); }
+        .action-item .info { flex: 1; }
+        .action-item .title { font-weight: 600; font-size: 0.88rem; }
+        .action-item .sub { font-size: 0.76rem; color: #888; }
+        .empty-state { text-align: center; padding: 3rem; color: #bbb; font-size: 0.88rem; }
+        .text-muted { color: #999; }
+        .text-sm { font-size: 0.76rem; }
+        .flex-between { display: flex; justify-content: space-between; align-items: center; }
+        /* ---- MODAL ANIMATION ---- */
+        @keyframes modalSlideIn {
+            from { opacity: 0; transform: translateY(12px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        div[id$="Modal"] .card, div[id="addModal"] .card {
+            animation: modalSlideIn 0.25s ease;
+        }
+        /* ---- FILTER TABS SCROLL ---- */
+        .filter-tabs { overflow-x: auto; -webkit-overflow-scrolling: touch; margin-bottom: 1.25rem; }
+        .filter-tabs-inner { display: flex; gap: 0.5rem; min-width: max-content; }
+        /* ---- RESPONSIVE ---- */
+        @media (max-width: 768px) {
+            .sidebar { transform: translateX(-100%); }
+            .sidebar.open { transform: translateX(0); }
+            .main { margin-left: 0; }
+            .hamburger { display: flex; }
+            .topbar { padding: 0.75rem 1rem; }
+            .content { padding: 1rem; }
+            .metric-grid { grid-template-columns: repeat(2, 1fr); gap: 0.75rem; }
+            .form-row { grid-template-columns: 1fr; }
+            table { min-width: 600px; }
+            .action-item { flex-direction: column; gap: 0.5rem; align-items: flex-start; }
+            .action-item form, .action-item a.btn { align-self: flex-end; }
+        }
+        @media (max-width: 480px) {
+            .metric-grid { grid-template-columns: 1fr; }
+            .metric .value { font-size: 1.3rem; }
+            .content { padding: 0.75rem; }
+        }
+    </style>
+</head>
+<body>
+    {% block body %}
+    <div class="sidebar-overlay" onclick="toggleSidebar()"></div>
+    <aside class="sidebar">
+        <div class="brand">Trace<span>Greens</span></div>
+        <div class="tagline">Admin Dashboard</div>
+        <nav>
+            <div class="section-label">Operations</div>
+            <a href="/admin/" {% if active_page == 'dashboard' %}class="active"{% endif %}>Dashboard</a>
+            <a href="/admin/batches" {% if active_page == 'batches' %}class="active"{% endif %}>Batches</a>
+            <a href="/admin/inventory" {% if active_page == 'inventory' %}class="active"{% endif %}>Seed Inventory</a>
+            <div class="section-label">Sales</div>
+            <a href="/admin/customers" {% if active_page == 'customers' %}class="active"{% endif %}>Customers</a>
+            <a href="/admin/orders" {% if active_page == 'orders' %}class="active"{% endif %}>Orders</a>
+        </nav>
+        <div class="sidebar-footer">
+            <a href="/" target="_blank">View Public Site</a>
+            <a href="/admin/logout">Log out</a>
+        </div>
+    </aside>
+    <div class="main">
+        <div class="topbar">
+            <div class="topbar-left">
+                <button class="hamburger" onclick="toggleSidebar()" aria-label="Menu">
+                    <span></span><span></span><span></span>
+                </button>
+                <h1>{% block page_title %}Dashboard{% endblock %}</h1>
+            </div>
+            <div>{% block topbar_actions %}{% endblock %}</div>
+        </div>
+        <div class="content">
+            {% block content %}{% endblock %}
+        </div>
+    </div>
+    <script>
+    function toggleSidebar() {
+        document.querySelector('.sidebar').classList.toggle('open');
+        document.querySelector('.sidebar-overlay').classList.toggle('active');
+    }
+    </script>
+    {% endblock %}
+</body>
+</html>

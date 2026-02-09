@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - TraceGreens</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #0d3b11 0%, #1b7a25 50%, #0d3b11 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            -webkit-font-smoothing: antialiased;
+        }
+        .login-card {
+            background: white;
+            border-radius: 14px;
+            padding: 2.5rem;
+            width: 360px;
+            max-width: calc(100vw - 2rem);
+            box-shadow: 0 8px 30px rgba(0,0,0,0.25);
+            animation: fadeInUp 0.4s ease;
+        }
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(16px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .login-card h1 {
+            font-size: 1.5rem;
+            color: #1b5e20;
+            margin-bottom: 0.25rem;
+        }
+        .login-card .tagline {
+            font-size: 0.8rem;
+            color: #999;
+            margin-bottom: 1.5rem;
+        }
+        .form-group { margin-bottom: 1rem; }
+        .form-group label {
+            display: block;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: #555;
+            margin-bottom: 0.3rem;
+        }
+        .form-group input {
+            width: 100%;
+            padding: 0.6rem 0.8rem;
+            border: 1.5px solid #ddd;
+            border-radius: 6px;
+            font-size: 0.95rem;
+            outline: none;
+            font-family: 'Inter', sans-serif;
+            transition: all 0.2s;
+        }
+        .form-group input:focus {
+            border-color: #2e7d32;
+            box-shadow: 0 0 0 3px rgba(46,125,50,0.12);
+        }
+        .btn {
+            width: 100%;
+            padding: 0.65rem;
+            background: #2e7d32;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 0.5rem;
+            font-family: 'Inter', sans-serif;
+            transition: all 0.2s;
+        }
+        .btn:hover { background: #1b5e20; }
+        .btn:active { transform: scale(0.98); }
+        .error {
+            background: #ffebee;
+            color: #b71c1c;
+            padding: 0.5rem 0.75rem;
+            border-radius: 6px;
+            margin-bottom: 1rem;
+            font-size: 0.85rem;
+        }
+        @media (max-width: 480px) {
+            .login-card { padding: 1.75rem; border-radius: 10px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="login-card">
+        <h1>TraceGreens</h1>
+        <p class="tagline">Process over Heroics</p>
+        {% if error %}
+        <div class="error">{{ error }}</div>
+        {% endif %}
+        <form method="POST" action="/admin/login">
+            <div class="form-group">
+                <label>Password</label>
+                <input type="password" name="password" placeholder="Enter admin password" autofocus required>
+            </div>
+            <button type="submit" class="btn">Sign In</button>
+        </form>
+    </div>
+</body>
+</html>

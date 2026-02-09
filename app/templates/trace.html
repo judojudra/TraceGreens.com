@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+{% block title %}Trace Your Tray - TraceGreens{% endblock %}
+{% block body %}
+{# Override body block completely — no sidebar for public page #}
+<div style="min-height:100vh; background:#f5f7f5;">
+    <div style="background:#1b5e20; color:white; padding:1rem 2rem; display:flex; justify-content:space-between; align-items:center;">
+        <div>
+            <span style="font-size:1.2rem; font-weight:700;">TraceGreens</span>
+            <span style="font-size:0.8rem; color:rgba(255,255,255,0.6); margin-left:0.75rem;">Trace Your Tray</span>
+        </div>
+    </div>
+
+    <div style="max-width:680px; margin:2rem auto; padding:0 1.5rem;">
+        <h1 style="font-size:1.6rem; color:#1b5e20; margin-bottom:0.25rem;">Trace Your Tray</h1>
+        <p style="color:#666; margin-bottom:1.5rem; font-size:0.9rem;">
+            Enter the batch ID from your microgreens package to see its complete journey from seed to your kitchen.
+        </p>
+
+        <form action="/trace" method="get" style="display:flex; gap:0.5rem; margin-bottom:1.5rem;">
+            <input type="text" name="batch_id" class="form-control" placeholder="e.g. TG-RAD-20260209-A"
+                   value="{{ query or '' }}" required style="flex:1; font-size:1rem; padding:0.6rem 1rem; border:2px solid #c8e6c9; border-radius:8px;">
+            <button type="submit" class="btn" style="padding:0.6rem 1.5rem; font-size:0.95rem;">Trace</button>
+        </form>
+
+        {% if error %}
+        <div class="alert alert-danger">{{ error }}</div>
+        {% endif %}
+
+        {% if batch %}
+        <div class="card" style="border-left: 4px solid #1b5e20;">
+            <div style="display:flex; justify-content:space-between; align-items:start; margin-bottom:1rem;">
+                <div>
+                    <h2 style="font-size:1.2rem; color:#1b5e20; margin-bottom:0.2rem;">{{ batch.batch_id }}</h2>
+                    <p style="color:#555; font-size:0.9rem;">{{ batch.seed_inventory.variety }} Microgreens</p>
+                </div>
+                <span class="badge badge-{{ batch.status|lower }}" style="font-size:0.82rem; padding:0.25rem 0.75rem;">{{ batch.status }}</span>
+            </div>
+
+            <div style="position:relative; padding-left:1.75rem; margin-top:1.25rem;">
+                <div style="position:absolute; left:0.45rem; top:0; bottom:0; width:2px; background:#c8e6c9;"></div>
+
+                <!-- Sown -->
+                <div style="position:relative; margin-bottom:1.25rem;">
+                    <div style="position:absolute; left:-1.45rem; top:0.35rem; width:10px; height:10px; border-radius:50%; background:#2e7d32;"></div>
+                    <div class="text-sm text-muted">{{ batch.sow_date.strftime('%B %d, %Y') }}</div>
+                    <div style="font-weight:600;">Seeds Sown</div>
+                    <div class="text-sm text-muted">{{ batch.sowing_weight_g }}g of {{ batch.seed_inventory.variety }} seeds</div>
+                    <div class="text-sm text-muted">Supplier: {{ batch.seed_inventory.supplier }} (Lot: {{ batch.seed_inventory.lot_number }})</div>
+                </div>
+
+                <!-- Blackout end -->
+                <div style="position:relative; margin-bottom:1.25rem;">
+                    <div style="position:absolute; left:-1.45rem; top:0.35rem; width:10px; height:10px; border-radius:50%; background:{% if batch.status == 'Blackout' %}#c8e6c9{% else %}#2e7d32{% endif %};"></div>
+                    <div class="text-sm text-muted">{{ batch.blackout_end_date.strftime('%B %d, %Y') }}</div>
+                    <div style="font-weight:600;">Moved to Light</div>
+                    <div class="text-sm text-muted">3 days of darkness to develop strong roots</div>
+                </div>
+
+                <!-- Harvest window -->
+                <div style="position:relative; margin-bottom:1.25rem;">
+                    <div style="position:absolute; left:-1.45rem; top:0.35rem; width:10px; height:10px; border-radius:50%; background:{% if batch.status in ('Blackout','Light') %}#c8e6c9{% else %}#2e7d32{% endif %};"></div>
+                    {% if batch.actual_harvest_date %}
+                    <div class="text-sm text-muted">{{ batch.actual_harvest_date.strftime('%B %d, %Y') }}</div>
+                    <div style="font-weight:600;">Harvested</div>
+                    {% if batch.yield_weight_g %}
+                    <div class="text-sm text-muted">Yield: {{ batch.yield_weight_g }}g of fresh microgreens</div>
+                    {% endif %}
+                    {% else %}
+                    <div class="text-sm text-muted">{{ batch.harvest_target_start.strftime('%B %d') }} - {{ batch.harvest_target_end.strftime('%B %d, %Y') }}</div>
+                    <div style="font-weight:600;">{% if batch.status in ('Blackout','Light') %}Harvest Window (upcoming){% else %}Harvest Window{% endif %}</div>
+                    {% endif %}
+                </div>
+
+                {% if batch.status == 'Discarded' %}
+                <div style="position:relative; margin-bottom:1.25rem;">
+                    <div style="position:absolute; left:-1.45rem; top:0.35rem; width:10px; height:10px; border-radius:50%; background:#b71c1c;"></div>
+                    <div style="font-weight:600; color:#b71c1c;">Discarded</div>
+                    {% if batch.notes %}
+                    <div class="text-sm text-muted">{{ batch.notes }}</div>
+                    {% endif %}
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div style="text-align:center; padding:1rem; color:#999; font-size:0.8rem;">
+            TraceGreens &mdash; Full traceability from seed to plate
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

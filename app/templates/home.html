@@ -1,0 +1,305 @@
+{% extends "public_base.html" %}
+{% block title %}TraceGreens — Chef-Grade Microgreens, Fully Traceable{% endblock %}
+{% block body %}
+{{ super() }}
+
+<!-- HERO -->
+<section class="hero">
+    <div class="container">
+        <div>
+            <p class="section-label">Navi Mumbai's Premium Microgreens</p>
+            <h1>Fresh. Traceable.<br><em>Chef-Grade.</em></h1>
+            <p>We grow microgreens with data-driven precision. Every tray is tracked from seed to your plate — so you know exactly what you're serving.</p>
+            <div class="hero-actions">
+                <a href="#order" class="btn-primary">Place an Order</a>
+                <a href="#trace" class="btn-secondary">Trace a Tray</a>
+            </div>
+        </div>
+        <div class="hero-visual">
+            <img class="hero-img" src="https://images.unsplash.com/photo-1523218551570-6881ad409172?w=800&q=80&auto=format&fit=crop" alt="Fresh microgreens growing in a tray" loading="eager">
+            <div class="hero-stat-row">
+                <div class="hero-stat">
+                    <div class="val">{{ metrics.total_batches }}</div>
+                    <div class="lbl">Batches Grown</div>
+                </div>
+                <div class="hero-stat">
+                    <div class="val">{{ metrics.avg_yield_g }}g</div>
+                    <div class="lbl">Avg Yield/Tray</div>
+                </div>
+                <div class="hero-stat">
+                    <div class="val">&lt;{{ metrics.mold_rate }}%</div>
+                    <div class="lbl">Mold Rate</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ABOUT -->
+<section class="features" id="about">
+    <div class="container">
+        <p class="section-label">Why TraceGreens</p>
+        <h2 class="section-title">Process Over Heroics</h2>
+        <p class="section-sub">We treat our farm as a data-driven small food factory. Every decision is measured, every tray is tracked.</p>
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 20A7 7 0 0 1 9.8 6.9C15.5 4.9 17 3.5 17 3.5s0 6-4.3 11.2"/><path d="M11 20v-8a5 5 0 0 1 5-5"/></svg>
+                </div>
+                <h3>Full Traceability</h3>
+                <p>Every tray has a unique ID. Scan it to see the exact seed lot, sow date, growth conditions, and harvest time.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
+                </div>
+                <h3>Data-Driven Quality</h3>
+                <p>We monitor mold rates, yields, and growth timelines obsessively. Our target: under 5% mold rate, every week.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"/><path d="M7 2v20"/><path d="M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3zm0 0v7"/></svg>
+                </div>
+                <h3>Chef-Grade Supply</h3>
+                <p>Consistent weight, consistent quality, consistent delivery. Your menu deserves ingredients you can rely on.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="how-section" id="how">
+    <div class="container">
+        <p class="section-label">From Seed to Your Kitchen</p>
+        <h2 class="section-title">How It Works</h2>
+        <p class="section-sub">Each microgreen tray follows a precise 7–9 day lifecycle, fully tracked in our system.</p>
+        <div class="steps-grid">
+            <div class="step-card">
+                <div class="step-num">1</div>
+                <h3>Seed</h3>
+                <p>Premium seeds weighed to exactly 25g per tray. Supplier and lot tracked.</p>
+            </div>
+            <div class="step-card">
+                <div class="step-num">2</div>
+                <h3>Blackout</h3>
+                <p>3 days in darkness to develop strong root systems and vibrant colour.</p>
+            </div>
+            <div class="step-card">
+                <div class="step-num">3</div>
+                <h3>Light</h3>
+                <p>Moved to light for 4–6 days. We monitor daily for mold and growth.</p>
+            </div>
+            <div class="step-card">
+                <div class="step-num">4</div>
+                <h3>Harvest</h3>
+                <p>Cut, weighed, packed, and delivered fresh — typically within hours.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- GALLERY -->
+<section class="gallery-section" id="gallery">
+    <div class="container">
+        <p class="section-label">Growing Journey</p>
+        <h2 class="section-title">From Our Farm</h2>
+        <p class="section-sub">Real photos from our growing trays — every image comes straight from our batch tracking system.</p>
+
+        {% if gallery_photos %}
+        <div class="gallery-grid">
+            {% for photo in gallery_photos %}
+            <div class="gallery-item">
+                <img src="{{ photo.photo_url }}" alt="{{ photo.description }}" loading="lazy">
+                <div class="gallery-caption">
+                    <div>
+                        <div class="gallery-batch">{{ photo.batch.batch_id }}</div>
+                        <div class="gallery-desc">{{ photo.description }}</div>
+                    </div>
+                    <div class="gallery-date">{{ photo.created_at.strftime('%d %b %Y') }}</div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="gallery-empty">Photos from our batch journeys will appear here as we grow.</div>
+        {% endif %}
+    </div>
+</section>
+
+<!-- TRACE -->
+<section class="trace-section" id="trace">
+    <div class="container">
+        <p class="section-label">Transparency Portal</p>
+        <h2 class="section-title">Trace Your Tray</h2>
+        <p class="section-sub">Enter the batch ID from your package to see the full life story of your microgreens.</p>
+
+        <div class="trace-box">
+            <form action="/#trace" method="get">
+                <div class="trace-input-row">
+                    <input type="text" name="batch_id" class="trace-input"
+                           placeholder="e.g. TG-RAD-20260209-A"
+                           value="{{ query or '' }}" required>
+                    <button type="submit" class="trace-btn">Trace</button>
+                </div>
+            </form>
+
+            {% if trace_error %}
+            <div class="trace-error">{{ trace_error }}</div>
+            {% endif %}
+
+            {% if batch %}
+            <div class="trace-result">
+                <div style="display:flex; justify-content:space-between; align-items:start;">
+                    <div>
+                        <h3>{{ batch.batch_id }}</h3>
+                        <div class="variety">{{ batch.seed_inventory.variety }} Microgreens</div>
+                    </div>
+                    <span class="trace-badge trace-badge-{{ batch.status|lower }}">{{ batch.status }}</span>
+                </div>
+
+                <div class="trace-timeline">
+                    {% if batch.events %}
+                    {# Dynamic timeline from events #}
+                    {% for event in batch.events %}
+                    <div class="t-step done">
+                        <div class="t-date">{{ event.created_at.strftime('%B %d, %Y · %I:%M %p') }}</div>
+                        <div class="t-event">
+                            {{ event.description }}
+                            {% if event.event_type == 'manual' %}
+                            <span style="display:inline-block; background:#e8f5e9; color:#2e7d32; font-size:0.7rem; padding:2px 6px; border-radius:3px; margin-left:6px; vertical-align:middle;">journal</span>
+                            {% endif %}
+                        </div>
+                        {% if event.photo_url %}
+                        <div class="t-photo" style="margin-top:8px;">
+                            <img src="{{ event.photo_url }}" alt="Event photo" style="max-width:100%; max-height:300px; border-radius:8px; border:1px solid #e0e0e0;">
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+
+                    {# Show upcoming harvest window for active batches #}
+                    {% if batch.status in ('Blackout', 'Light') %}
+                    <div class="t-step upcoming">
+                        <div class="t-date">{{ batch.harvest_target_start.strftime('%B %d') }} – {{ batch.harvest_target_end.strftime('%B %d, %Y') }}</div>
+                        <div class="t-event">Harvest Window</div>
+                    </div>
+                    {% endif %}
+
+                    {% else %}
+                    {# Fallback: static timeline for legacy batches with no events #}
+                    <div class="t-step done">
+                        <div class="t-date">{{ batch.sow_date.strftime('%B %d, %Y') }}</div>
+                        <div class="t-event">Seeds Sown</div>
+                        <div class="t-detail">{{ batch.sowing_weight_g }}g &middot; {{ batch.seed_inventory.supplier }} &middot; Lot {{ batch.seed_inventory.lot_number }}</div>
+                    </div>
+
+                    <div class="t-step {% if batch.status == 'Blackout' %}upcoming{% else %}done{% endif %}">
+                        <div class="t-date">{{ batch.blackout_end_date.strftime('%B %d, %Y') }}</div>
+                        <div class="t-event">Moved to Light</div>
+                        <div class="t-detail">3 days of darkness for strong root development</div>
+                    </div>
+
+                    {% if batch.actual_harvest_date %}
+                    <div class="t-step done">
+                        <div class="t-date">{{ batch.actual_harvest_date.strftime('%B %d, %Y') }}</div>
+                        <div class="t-event">Harvested</div>
+                        {% if batch.yield_weight_g %}
+                        <div class="t-detail">{{ batch.yield_weight_g }}g of fresh microgreens</div>
+                        {% endif %}
+                    </div>
+                    {% else %}
+                    <div class="t-step {% if batch.status in ('Blackout','Light') %}upcoming{% else %}done{% endif %}">
+                        <div class="t-date">{{ batch.harvest_target_start.strftime('%B %d') }} – {{ batch.harvest_target_end.strftime('%B %d, %Y') }}</div>
+                        <div class="t-event">Harvest Window</div>
+                    </div>
+                    {% endif %}
+
+                    {% if batch.status == 'Discarded' %}
+                    <div class="t-step done">
+                        <div class="t-event" style="color:#ff6b6b;">Discarded</div>
+                        {% if batch.notes %}
+                        <div class="t-detail">{{ batch.notes }}</div>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</section>
+
+<!-- ORDER / CONTACT -->
+<section class="order-section" id="order">
+    <div class="container">
+        <p class="section-label">Get Started</p>
+        <h2 class="section-title">Order & Contact</h2>
+        <p class="section-sub">Interested in regular chef-grade microgreen supplies? Get in touch.</p>
+
+        <div class="contact-grid">
+            <div class="contact-info">
+                <h3>Why Chefs Choose Us</h3>
+                <p>Consistent quality. Full traceability. Reliable weekly delivery across Navi Mumbai.</p>
+
+                <div class="contact-detail">
+                    <span class="cd-label">Price</span>
+                    <span>From &#8377;1,600/kg for premium microgreens</span>
+                </div>
+                <div class="contact-detail">
+                    <span class="cd-label">MOQ</span>
+                    <span>100g per variety per delivery</span>
+                </div>
+                <div class="contact-detail">
+                    <span class="cd-label">Delivery</span>
+                    <span>Weekly, across Navi Mumbai</span>
+                </div>
+                <div class="contact-detail">
+                    <span class="cd-label">Varieties</span>
+                    <span>Radish, Pea Shoots, and seasonal specials</span>
+                </div>
+                <div class="contact-detail">
+                    <span class="cd-label">Phone</span>
+                    <span>+91 8097358814</span>
+                </div>
+                <div class="contact-detail">
+                    <span class="cd-label">Email</span>
+                    <span>sales@tracegreens.com</span>
+                </div>
+            </div>
+
+            <div class="contact-form">
+                <h3>Enquire / Place Order</h3>
+                <form action="/enquiry" method="POST">
+                    <div class="cf-row">
+                        <div class="cf-group">
+                            <label>Your Name</label>
+                            <input type="text" name="name" class="cf-input" required placeholder="Chef's name">
+                        </div>
+                        <div class="cf-group">
+                            <label>Restaurant</label>
+                            <input type="text" name="restaurant" class="cf-input" placeholder="Restaurant name">
+                        </div>
+                    </div>
+                    <div class="cf-row">
+                        <div class="cf-group">
+                            <label>Phone</label>
+                            <input type="tel" name="phone" class="cf-input" required placeholder="+91-...">
+                        </div>
+                        <div class="cf-group">
+                            <label>Email</label>
+                            <input type="email" name="email" class="cf-input" placeholder="your@email.com">
+                        </div>
+                    </div>
+                    <div class="cf-group">
+                        <label>What are you looking for?</label>
+                        <textarea name="message" class="cf-input" placeholder="e.g. 500g Radish + 300g Pea Shoots weekly, starting next Monday..."></textarea>
+                    </div>
+                    <button type="submit" class="btn-primary" style="width:100%; justify-content:center;">Send Enquiry</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</section>
+
+{% endblock %}

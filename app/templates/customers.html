@@ -1,0 +1,120 @@
+{% extends "base.html" %}
+{% block title %}Customers - TraceGreens{% endblock %}
+{% block page_title %}Customers{% endblock %}
+{% block topbar_actions %}
+<button onclick="document.getElementById('addModal').style.display='flex'" class="btn">+ Add Customer</button>
+{% endblock %}
+{% block content %}
+
+<div class="card">
+    {% if customers %}
+    <div class="table-wrap">
+    <table>
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Restaurant</th>
+                <th>Phone</th>
+                <th>Email</th>
+                <th>Since</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for c in customers %}
+            <tr>
+                <td><strong>{{ c.name }}</strong></td>
+                <td>{{ c.restaurant_name or '-' }}</td>
+                <td>{{ c.phone or '-' }}</td>
+                <td>{{ c.email or '-' }}</td>
+                <td class="text-sm text-muted">{{ c.created_at.strftime('%d %b %Y') }}</td>
+                <td>
+                    <button onclick="openEditCust({{ c.id }}, '{{ c.name }}', '{{ c.restaurant_name or '' }}', '{{ c.phone or '' }}', '{{ c.email or '' }}')" class="btn btn-sm btn-outline">Edit</button>
+                    <form method="POST" action="/admin/customers/{{ c.id }}/delete" style="display:inline" onsubmit="return confirm('Delete {{ c.name }}? Only works if they have no orders.')">
+                        <button type="submit" class="btn btn-sm btn-danger">Del</button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    </div>
+    {% else %}
+    <div class="empty-state"><p>No customers yet.</p></div>
+    {% endif %}
+</div>
+
+<!-- Add Customer Modal -->
+<div id="addModal" style="display:none; position:fixed; top:0;left:0;right:0;bottom:0; background:rgba(0,0,0,0.4); z-index:100; justify-content:center; align-items:center;">
+    <div class="card" style="width:420px; max-width:90vw;">
+        <h2>Add Customer</h2>
+        <form method="POST" action="/admin/customers/create">
+            <div class="form-group">
+                <label>Name</label>
+                <input type="text" name="name" class="form-control" required placeholder="Chef's name">
+            </div>
+            <div class="form-group">
+                <label>Restaurant Name</label>
+                <input type="text" name="restaurant_name" class="form-control" placeholder="Optional">
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Phone</label>
+                    <input type="text" name="phone" class="form-control" placeholder="+91-...">
+                </div>
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" name="email" class="form-control" placeholder="Optional">
+                </div>
+            </div>
+            <div style="display:flex; gap:0.5rem; justify-content:flex-end;">
+                <button type="button" onclick="document.getElementById('addModal').style.display='none'" class="btn btn-outline">Cancel</button>
+                <button type="submit" class="btn">Add Customer</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Edit Customer Modal -->
+<div id="editModal" style="display:none; position:fixed; top:0;left:0;right:0;bottom:0; background:rgba(0,0,0,0.4); z-index:100; justify-content:center; align-items:center;">
+    <div class="card" style="width:420px; max-width:90vw;">
+        <h2>Edit Customer</h2>
+        <form method="POST" id="editForm" action="">
+            <div class="form-group">
+                <label>Name</label>
+                <input type="text" name="name" id="e_name" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label>Restaurant Name</label>
+                <input type="text" name="restaurant_name" id="e_restaurant" class="form-control">
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Phone</label>
+                    <input type="text" name="phone" id="e_phone" class="form-control">
+                </div>
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" name="email" id="e_email" class="form-control">
+                </div>
+            </div>
+            <div style="display:flex; gap:0.5rem; justify-content:flex-end;">
+                <button type="button" onclick="document.getElementById('editModal').style.display='none'" class="btn btn-outline">Cancel</button>
+                <button type="submit" class="btn">Save</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+function openEditCust(id, name, restaurant, phone, email) {
+    document.getElementById('editForm').action = '/admin/customers/' + id + '/edit';
+    document.getElementById('e_name').value = name;
+    document.getElementById('e_restaurant').value = restaurant;
+    document.getElementById('e_phone').value = phone;
+    document.getElementById('e_email').value = email;
+    document.getElementById('editModal').style.display = 'flex';
+}
+</script>
+
+{% endblock %}

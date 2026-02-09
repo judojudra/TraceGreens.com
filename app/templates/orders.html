@@ -1,0 +1,133 @@
+{% extends "base.html" %}
+{% block title %}Orders - TraceGreens{% endblock %}
+{% block page_title %}Orders{% endblock %}
+{% block topbar_actions %}
+<button onclick="document.getElementById('addModal').style.display='flex'" class="btn">+ New Order</button>
+{% endblock %}
+{% block content %}
+
+<div class="metric-grid">
+    <div class="metric">
+        <div class="value">{{ total_orders }}</div>
+        <div class="label">Total Orders</div>
+    </div>
+    <div class="metric">
+        <div class="value">{{ total_revenue }}</div>
+        <div class="label">Total Revenue (INR)</div>
+    </div>
+</div>
+
+<div class="card">
+    {% if orders %}
+    <div class="table-wrap">
+    <table>
+        <thead>
+            <tr>
+                <th>Order #</th>
+                <th>Customer</th>
+                <th>Batch</th>
+                <th>Quantity</th>
+                <th>Price/g</th>
+                <th>Total</th>
+                <th>Date</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for o in orders %}
+            <tr>
+                <td>#{{ o.id }}</td>
+                <td><strong>{{ o.customer.name }}</strong></td>
+                <td>{{ o.batch.batch_id }}</td>
+                <td>{{ o.quantity_g }}g</td>
+                <td>{{ o.price_per_g }}</td>
+                <td>{{ o.total_price }}</td>
+                <td class="text-sm text-muted">{{ o.order_date.strftime('%d %b %Y') }}</td>
+                <td>
+                    <button onclick="openEditOrder({{ o.id }}, '{{ o.quantity_g }}', '{{ o.price_per_g }}')" class="btn btn-sm btn-outline">Edit</button>
+                    <form method="POST" action="/admin/orders/{{ o.id }}/delete" style="display:inline" onsubmit="return confirm('Delete order #{{ o.id }}?')">
+                        <button type="submit" class="btn btn-sm btn-danger">Del</button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    </div>
+    {% else %}
+    <div class="empty-state"><p>No orders yet.</p></div>
+    {% endif %}
+</div>
+
+<!-- New Order Modal -->
+<div id="addModal" style="display:none; position:fixed; top:0;left:0;right:0;bottom:0; background:rgba(0,0,0,0.4); z-index:100; justify-content:center; align-items:center;">
+    <div class="card" style="width:420px; max-width:90vw;">
+        <h2>New Order</h2>
+        <form method="POST" action="/admin/orders/create">
+            <div class="form-group">
+                <label>Customer</label>
+                <select name="customer_id" class="form-control" required>
+                    {% for c in customers %}
+                    <option value="{{ c.id }}">{{ c.name }}{% if c.restaurant_name %} ({{ c.restaurant_name }}){% endif %}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Batch (Harvested only)</label>
+                <select name="batch_id" class="form-control" required>
+                    {% for b in harvested_batches %}
+                    <option value="{{ b.id }}">{{ b.batch_id }} — {{ b.seed_inventory.variety }} ({{ b.yield_weight_g }}g)</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Quantity (g)</label>
+                    <input type="number" name="quantity_g" class="form-control" step="0.1" required placeholder="150">
+                </div>
+                <div class="form-group">
+                    <label>Price per gram (INR)</label>
+                    <input type="number" name="price_per_g" class="form-control" step="0.01" value="1.6" required>
+                </div>
+            </div>
+            <div style="display:flex; gap:0.5rem; justify-content:flex-end;">
+                <button type="button" onclick="document.getElementById('addModal').style.display='none'" class="btn btn-outline">Cancel</button>
+                <button type="submit" class="btn">Create Order</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Edit Order Modal -->
+<div id="editModal" style="display:none; position:fixed; top:0;left:0;right:0;bottom:0; background:rgba(0,0,0,0.4); z-index:100; justify-content:center; align-items:center;">
+    <div class="card" style="width:400px; max-width:90vw;">
+        <h2>Edit Order</h2>
+        <form method="POST" id="editForm" action="">
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Quantity (g)</label>
+                    <input type="number" name="quantity_g" id="e_qty" class="form-control" step="0.1" required>
+                </div>
+                <div class="form-group">
+                    <label>Price per gram (INR)</label>
+                    <input type="number" name="price_per_g" id="e_ppg" class="form-control" step="0.01" required>
+                </div>
+            </div>
+            <div style="display:flex; gap:0.5rem; justify-content:flex-end;">
+                <button type="button" onclick="document.getElementById('editModal').style.display='none'" class="btn btn-outline">Cancel</button>
+                <button type="submit" class="btn">Save</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+function openEditOrder(id, qty, ppg) {
+    document.getElementById('editForm').action = '/admin/orders/' + id + '/edit';
+    document.getElementById('e_qty').value = qty;
+    document.getElementById('e_ppg').value = ppg;
+    document.getElementById('editModal').style.display = 'flex';
+}
+</script>
+
+{% endblock %}

@@ -1,0 +1,207 @@
+{% extends "base.html" %}
+{% block title %}Batches - TraceGreens{% endblock %}
+{% block page_title %}Batches{% endblock %}
+{% block topbar_actions %}
+<button onclick="document.getElementById('newBatchModal').style.display='flex'" class="btn">+ New Batch</button>
+{% endblock %}
+{% block content %}
+
+<!-- Filter tabs -->
+<div class="filter-tabs">
+    <div class="filter-tabs-inner">
+        <a href="/admin/batches" class="btn btn-sm {% if not status_filter %}{% else %}btn-outline{% endif %}">All ({{ counts.all }})</a>
+        <a href="/admin/batches?status=Blackout" class="btn btn-sm {% if status_filter == 'Blackout' %}{% else %}btn-outline{% endif %}">Blackout ({{ counts.blackout }})</a>
+        <a href="/admin/batches?status=Light" class="btn btn-sm {% if status_filter == 'Light' %}{% else %}btn-outline{% endif %}">Light ({{ counts.light }})</a>
+        <a href="/admin/batches?status=Harvested" class="btn btn-sm {% if status_filter == 'Harvested' %}{% else %}btn-outline{% endif %}">Harvested ({{ counts.harvested }})</a>
+        <a href="/admin/batches?status=Discarded" class="btn btn-sm {% if status_filter == 'Discarded' %}{% else %}btn-outline{% endif %}">Discarded ({{ counts.discarded }})</a>
+    </div>
+</div>
+
+<div class="card">
+    {% if batches %}
+    <div class="table-wrap">
+    <table>
+        <thead>
+            <tr>
+                <th>Batch ID</th>
+                <th>Variety</th>
+                <th>Status</th>
+                <th>Sow Date</th>
+                <th>Yield</th>
+                <th>Mold</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for batch in batches %}
+            <tr>
+                <td><strong>{{ batch.batch_id }}</strong></td>
+                <td>{{ batch.seed_inventory.variety }}</td>
+                <td><span class="badge badge-{{ batch.status|lower }}">{{ batch.status }}</span></td>
+                <td>{{ batch.sow_date.strftime('%d %b %Y') }}</td>
+                <td>{{ batch.yield_weight_g or '-' }}{% if batch.yield_weight_g %}g{% endif %}</td>
+                <td>{% if batch.mold_incident %}<span style="color:#b71c1c;">Yes</span>{% else %}-{% endif %}</td>
+                <td>
+                    {% if batch.status in ('Blackout', 'Light') %}
+                    <button onclick="openEvent({{ batch.id }}, '{{ batch.batch_id }}')" class="btn btn-sm btn-outline" style="margin-bottom:4px;">+ Event</button>
+                    <button onclick="openEditBatch({{ batch.id }}, '{{ batch.batch_id }}', '{{ batch.sowing_weight_g }}', '{{ batch.notes or '' }}')" class="btn btn-sm btn-outline" style="margin-bottom:4px;">Edit</button>
+                    {% endif %}
+                    {% if batch.status == 'Blackout' %}
+                    <form method="POST" action="/admin/batches/{{ batch.id }}/quick-transition" style="display:inline">
+                        <input type="hidden" name="new_status" value="Light">
+                        <button type="submit" class="btn btn-sm btn-warning">To Light</button>
+                    </form>
+                    {% elif batch.status == 'Light' %}
+                    <button onclick="openHarvest({{ batch.id }}, '{{ batch.batch_id }}')" class="btn btn-sm">Harvest</button>
+                    <form method="POST" action="/admin/batches/{{ batch.id }}/quick-transition" style="display:inline">
+                        <input type="hidden" name="new_status" value="Discarded">
+                        <button type="submit" class="btn btn-sm btn-danger">Discard</button>
+                    </form>
+                    {% endif %}
+                    <form method="POST" action="/admin/batches/{{ batch.id }}/delete" style="display:inline" onsubmit="return confirm('Delete batch {{ batch.batch_id }}? Only works if no orders reference it.')">
+                        <button type="submit" class="btn btn-sm btn-danger">Del</button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    </div>
+    {% else %}
+    <div class="empty-state"><p>No batches found.</p></div>
+    {% endif %}
+</div>
+
+<!-- New Batch Modal -->
+<div id="newBatchModal" style="display:none; position:fixed; top:0;left:0;right:0;bottom:0; background:rgba(0,0,0,0.4); z-index:100; justify-content:center; align-items:center;">
+    <div class="card" style="width:420px; max-width:90vw;">
+        <h2>New Batch</h2>
+        <form method="POST" action="/admin/batches/create">
+            <div class="form-group">
+                <label>Seed Variety</label>
+                <select name="seed_inventory_id" class="form-control" required>
+                    {% for seed in seeds %}
+                    <option value="{{ seed.id }}">{{ seed.variety }} ({{ seed.variety_code }})</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Sow Date</label>
+                    <input type="date" name="sow_date" class="form-control" value="{{ today }}" required>
+                </div>
+                <div class="form-group">
+                    <label>Sowing Weight (g)</label>
+                    <input type="number" name="sowing_weight_g" class="form-control" value="25" step="0.1" required>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Notes (optional)</label>
+                <input type="text" name="notes" class="form-control" placeholder="Any notes about this batch">
+            </div>
+            <div style="display:flex; gap:0.5rem; justify-content:flex-end;">
+                <button type="button" onclick="document.getElementById('newBatchModal').style.display='none'" class="btn btn-outline">Cancel</button>
+                <button type="submit" class="btn">Create Batch</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Harvest Modal -->
+<div id="harvestModal" style="display:none; position:fixed; top:0;left:0;right:0;bottom:0; background:rgba(0,0,0,0.4); z-index:100; justify-content:center; align-items:center;">
+    <div class="card" style="width:400px; max-width:90vw;">
+        <h2>Harvest Batch <span id="harvestBatchId"></span></h2>
+        <form method="POST" id="harvestForm" action="">
+            <input type="hidden" name="new_status" value="Harvested">
+            <div class="form-group">
+                <label>Yield Weight (g)</label>
+                <input type="number" name="yield_weight_g" class="form-control" step="0.1" required placeholder="e.g. 180">
+            </div>
+            <div class="form-group">
+                <label>
+                    <input type="checkbox" name="mold_incident" value="true"> Mold incident
+                </label>
+            </div>
+            <div class="form-group">
+                <label>Notes (optional)</label>
+                <input type="text" name="notes" class="form-control">
+            </div>
+            <div style="display:flex; gap:0.5rem; justify-content:flex-end;">
+                <button type="button" onclick="document.getElementById('harvestModal').style.display='none'" class="btn btn-outline">Cancel</button>
+                <button type="submit" class="btn">Harvest</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Add Event Modal -->
+<div id="eventModal" style="display:none; position:fixed; top:0;left:0;right:0;bottom:0; background:rgba(0,0,0,0.4); z-index:100; justify-content:center; align-items:center;">
+    <div class="card" style="width:420px; max-width:90vw;">
+        <h2>Add Event — <span id="eventBatchId"></span></h2>
+        <form method="POST" id="eventForm" action="" enctype="multipart/form-data">
+            <div class="form-group">
+                <label>Description</label>
+                <textarea name="description" class="form-control" rows="3" required placeholder="e.g. Looking great — nice green colour, no mold"></textarea>
+            </div>
+            {% if r2_available %}
+            <div class="form-group">
+                <label>Photo (optional, max 5MB)</label>
+                <input type="file" name="photo" accept="image/jpeg,image/png,image/webp" class="form-control">
+            </div>
+            {% endif %}
+            <div style="display:flex; gap:0.5rem; justify-content:flex-end;">
+                <button type="button" onclick="document.getElementById('eventModal').style.display='none'" class="btn btn-outline">Cancel</button>
+                <button type="submit" class="btn">Add Event</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Edit Batch Modal -->
+<div id="editBatchModal" style="display:none; position:fixed; top:0;left:0;right:0;bottom:0; background:rgba(0,0,0,0.4); z-index:100; justify-content:center; align-items:center;">
+    <div class="card" style="width:400px; max-width:90vw;">
+        <h2>Edit Batch <span id="editBatchTitle"></span></h2>
+        <form method="POST" id="editBatchForm" action="">
+            <div class="form-group">
+                <label>Sowing Weight (g)</label>
+                <input type="number" name="sowing_weight_g" id="e_sowing_weight" class="form-control" step="0.1" required>
+            </div>
+            <div class="form-group">
+                <label>Notes</label>
+                <input type="text" name="notes" id="e_notes" class="form-control" placeholder="Any notes about this batch">
+            </div>
+            <div style="display:flex; gap:0.5rem; justify-content:flex-end;">
+                <button type="button" onclick="document.getElementById('editBatchModal').style.display='none'" class="btn btn-outline">Cancel</button>
+                <button type="submit" class="btn">Save</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+function openEditBatch(id, batchId, weight, notes) {
+    document.getElementById('editBatchTitle').textContent = batchId;
+    document.getElementById('editBatchForm').action = '/admin/batches/' + id + '/edit';
+    document.getElementById('e_sowing_weight').value = weight;
+    document.getElementById('e_notes').value = notes;
+    document.getElementById('editBatchModal').style.display = 'flex';
+}
+
+function openEvent(id, batchId) {
+    document.getElementById('eventBatchId').textContent = batchId;
+    document.getElementById('eventForm').action = '/admin/batches/' + id + '/add-event';
+    document.getElementById('eventModal').style.display = 'flex';
+}
+
+function openHarvest(id, batchId) {
+    document.getElementById('harvestBatchId').textContent = batchId;
+    document.getElementById('harvestForm').action = '/admin/batches/' + id + '/harvest';
+    document.getElementById('harvestModal').style.display = 'flex';
+}
+{% if harvest_id %}
+// Auto-open harvest modal for batch from dashboard
+openHarvest({{ harvest_id }}, '{{ harvest_batch_id }}');
+{% endif %}
+</script>
+
+{% endblock %}

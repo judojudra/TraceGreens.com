@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+{% block title %}Dashboard - TraceGreens{% endblock %}
+{% block page_title %}Dashboard{% endblock %}
+{% block content %}
+
+<div class="metric-grid">
+    <div class="metric">
+        <div class="value">{{ metrics.total_batches }}</div>
+        <div class="label">Total Batches</div>
+    </div>
+    <div class="metric">
+        <div class="value">{{ metrics.active_batches }}</div>
+        <div class="label">Active (Growing)</div>
+    </div>
+    <div class="metric">
+        <div class="value">{{ metrics.harvested_count }}</div>
+        <div class="label">Harvested</div>
+    </div>
+    <div class="metric">
+        <div class="value" style="color: {{ '#b71c1c' if not metrics.mold_ok else '#1b5e20' }}">
+            {{ metrics.mold_rate }}%
+        </div>
+        <div class="label">Mold Rate {% if not metrics.mold_ok %}(above 5%!){% endif %}</div>
+    </div>
+    <div class="metric">
+        <div class="value">{{ metrics.avg_yield_g }}g</div>
+        <div class="label">Avg Yield / Tray</div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="flex-between" style="margin-bottom: 0.75rem;">
+        <h2 style="margin-bottom: 0;">Today's Tasks</h2>
+        <span class="text-sm text-muted">{{ today }}</span>
+    </div>
+
+    {% if not need_light and not ready_harvest %}
+    <div class="empty-state">
+        <p>No actions needed today. All trays are on schedule.</p>
+    </div>
+    {% endif %}
+
+    {% for batch in need_light %}
+    <div class="action-item">
+        <div class="info">
+            <div class="title">Move to Light: {{ batch.batch_id }}</div>
+            <div class="sub">{{ batch.seed_inventory.variety }} &middot; Sowed {{ batch.sow_date.strftime('%d %b') }} &middot; Blackout ended {{ batch.blackout_end_date.strftime('%d %b') }}</div>
+        </div>
+        <form method="POST" action="/admin/batches/{{ batch.id }}/quick-transition">
+            <input type="hidden" name="new_status" value="Light">
+            <button type="submit" class="btn btn-sm btn-warning">Move to Light</button>
+        </form>
+    </div>
+    {% endfor %}
+
+    {% for batch in ready_harvest %}
+    <div class="action-item">
+        <div class="info">
+            <div class="title">Ready to Harvest: {{ batch.batch_id }}</div>
+            <div class="sub">{{ batch.seed_inventory.variety }} &middot; Window: {{ batch.harvest_target_start.strftime('%d %b') }} - {{ batch.harvest_target_end.strftime('%d %b') }}</div>
+        </div>
+        <a href="/admin/batches?harvest={{ batch.id }}" class="btn btn-sm">Harvest</a>
+    </div>
+    {% endfor %}
+</div>
+
+<div class="card">
+    <div class="flex-between" style="margin-bottom: 0.75rem;">
+        <h2 style="margin-bottom: 0;">All Active Batches</h2>
+        <a href="/admin/batches" class="btn btn-sm btn-outline">View All</a>
+    </div>
+    {% if active_batches %}
+    <div class="table-wrap">
+    <table>
+        <thead>
+            <tr>
+                <th>Batch ID</th>
+                <th>Variety</th>
+                <th>Status</th>
+                <th>Sow Date</th>
+                <th>Next Milestone</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for batch in active_batches %}
+            <tr>
+                <td><strong>{{ batch.batch_id }}</strong></td>
+                <td>{{ batch.seed_inventory.variety }}</td>
+                <td><span class="badge badge-{{ batch.status|lower }}">{{ batch.status }}</span></td>
+                <td>{{ batch.sow_date.strftime('%d %b %Y') }}</td>
+                <td class="text-sm text-muted">
+                    {% if batch.status == 'Blackout' %}
+                    Light on {{ batch.blackout_end_date.strftime('%d %b') }}
+                    {% elif batch.status == 'Light' %}
+                    Harvest {{ batch.harvest_target_start.strftime('%d %b') }} - {{ batch.harvest_target_end.strftime('%d %b') }}
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    </div>
+    {% else %}
+    <div class="empty-state"><p>No active batches. <a href="/admin/batches">Create one</a>.</p></div>
+    {% endif %}
+</div>
+
+{% endblock %}
