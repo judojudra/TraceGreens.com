@@ -41,6 +41,7 @@ def apple_touch_icon():
 
 
 @router.get("/", response_class=HTMLResponse, include_in_schema=False)
+@router.head("/", response_class=HTMLResponse, include_in_schema=False)
 def homepage(
     request: Request,
     batch_id: str = Query(None),
