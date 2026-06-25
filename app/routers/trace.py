@@ -15,23 +15,28 @@ templates = Jinja2Templates(directory="app/templates")
 
 
 @router.get("/favicon.ico", include_in_schema=False)
+@router.head("/favicon.ico", include_in_schema=False)
 def favicon_ico():
     return FileResponse("app/static/favicon.ico")
 
 
 @router.get("/favicon.svg", include_in_schema=False)
+@router.head("/favicon.svg", include_in_schema=False)
 def favicon_svg():
     return FileResponse("app/static/favicon.svg")
 
 
 @router.get("/favicon.png", include_in_schema=False)
+@router.head("/favicon.png", include_in_schema=False)
 def favicon_png():
     return FileResponse("app/static/favicon.png")
 
 
 @router.get("/apple-touch-icon.png", include_in_schema=False)
+@router.head("/apple-touch-icon.png", include_in_schema=False)
 def apple_touch_icon():
     return FileResponse("app/static/apple-touch-icon.png")
+
 
 
 
