@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
+  <defs>
+    <filter id="glow-blur">
+      <feGaussianBlur stdDeviation="4" />
+    </filter>
+  </defs>
+
+  <!-- Background Circle -->
+  <circle cx="256" cy="256" r="240" fill="#0d3b11" />
+  
+  <!-- Outer Glow Ring -->
+  <circle cx="256" cy="256" r="220" fill="none" stroke="#2ecc40" stroke-width="4" stroke-opacity="0.3" stroke-dasharray="12 8" />
+  
+  <!-- Tracing Paths / Network Nodes -->
+  <path d="M 120 380 Q 200 400 256 360 T 392 380" fill="none" stroke="#2ecc40" stroke-width="3" stroke-dasharray="6 6" stroke-opacity="0.4" />
+  <path d="M 180 200 C 120 280 200 320 256 360" fill="none" stroke="#2ecc40" stroke-width="2" stroke-opacity="0.3" />
+  <path d="M 332 200 C 392 280 312 320 256 360" fill="none" stroke="#2ecc40" stroke-width="2" stroke-opacity="0.3" />
+
+  <!-- Node dots -->
+  <circle cx="180" cy="200" r="6" fill="#2ecc40" opacity="0.8" />
+  <circle cx="332" cy="200" r="6" fill="#2ecc40" opacity="0.8" />
+  <circle cx="120" cy="380" r="5" fill="#2ecc40" opacity="0.6" />
+  <circle cx="392" cy="380" r="5" fill="#2ecc40" opacity="0.6" />
+
+  <!-- Main Sprout Stem -->
+  <path d="M 256 400 C 256 340 256 220 256 180" fill="none" stroke="#2ecc40" stroke-width="20" stroke-linecap="round" />
+  <path d="M 256 400 C 256 340 256 220 256 180" fill="none" stroke="#1b7a25" stroke-width="10" stroke-linecap="round" />
+
+  <!-- Left Leaf -->
+  <path d="M 256 260 C 210 240 130 200 130 140 C 130 90 200 120 256 180 Z" fill="#2ecc40" />
+  <path d="M 256 260 C 220 245 160 215 150 170 C 190 150 230 170 256 180 Z" fill="#1b7a25" opacity="0.8" />
+
+  <!-- Right Leaf -->
+  <path d="M 256 230 C 290 210 370 170 370 120 C 370 70 310 100 256 150 Z" fill="#3ddb52" />
+  <path d="M 256 230 C 280 215 330 185 340 145 C 310 130 280 145 256 150 Z" fill="#22952e" opacity="0.8" />
+
+  <!-- Glow effect on top sprout -->
+  <circle cx="256" cy="180" r="12" fill="#faf9f6" opacity="0.2" filter="url(#glow-blur)" />
+</svg>

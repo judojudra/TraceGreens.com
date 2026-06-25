@@ -1,7 +1,7 @@
 """Public-facing routes — no auth required."""
 
 from fastapi import APIRouter, Depends, Query, Request
-from fastapi.responses import HTMLResponse, RedirectResponse
+from fastapi.responses import FileResponse, HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session, joinedload
 
@@ -12,6 +12,27 @@ from app.services.metrics_service import get_metrics
 
 router = APIRouter(tags=["Public"])
 templates = Jinja2Templates(directory="app/templates")
+
+
+@router.get("/favicon.ico", include_in_schema=False)
+def favicon_ico():
+    return FileResponse("app/static/favicon.ico")
+
+
+@router.get("/favicon.svg", include_in_schema=False)
+def favicon_svg():
+    return FileResponse("app/static/favicon.svg")
+
+
+@router.get("/favicon.png", include_in_schema=False)
+def favicon_png():
+    return FileResponse("app/static/favicon.png")
+
+
+@router.get("/apple-touch-icon.png", include_in_schema=False)
+def apple_touch_icon():
+    return FileResponse("app/static/apple-touch-icon.png")
+
 
 
 @router.get("/", response_class=HTMLResponse, include_in_schema=False)
